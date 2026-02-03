@@ -1,3 +1,4 @@
+import { Link } from "expo-router";
 import { useState } from "react";
 import { View, TextInput, Button, Text, StyleSheet } from "react-native";
 
@@ -38,6 +39,8 @@ export default function LoginScreen() {
       <Button title="Login" onPress={handleLogin} />
 
       {message ? <Text style={styles.message}>{message}</Text> : null}
+
+      <Link href="/SignupScreen">Signup</Link>
     </View>
   );
 }

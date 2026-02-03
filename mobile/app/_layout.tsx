@@ -1,5 +1,5 @@
-import LoginScreen from "./screens/LoginScreen";
+import { Stack } from "expo-router";
 
-export default function App() {
-  return <LoginScreen />;
+export default function Layout() {
+  return <Stack />;
 }

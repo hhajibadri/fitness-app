@@ -45,7 +45,7 @@ export default function SignupScreen() {
 
       <TextInput
         style={styles.input}
-        placeholder="Password"
+        placeholder="Verify password"
         value={passwordCheck}
         onChangeText={setPasswordCheck}
         secureTextEntry
@@ -67,12 +67,30 @@ export default function SignupScreen() {
         onChangeText={setLastName}
       />
 
-      <Pressable>
+      <Pressable
+        style={styles.dobInput}
+        onPress={() => setShowPicker(true)}
+      >
         <Text>{formattedDob}</Text>
         <Ionicons name="calendar-outline" size={20} color="#666" />
       </Pressable>
 
-      <Button title="Signup" onPress={handleSignup} />
+      {showPicker && (
+        <DateTimePicker
+          value={dob ?? new Date()}
+          mode="date"
+          display="default"
+          maximumDate={new Date()}
+          onChange={(_, selectedDate) => {
+            setShowPicker(false);
+            if (selectedDate) {
+              setDob(selectedDate);
+            }
+          }}
+        />
+      )}
+
+      <Button title="Signup" onPress={handleSignup} disabled={!isSame || !password} />
 
     </View>
   );
@@ -102,8 +120,20 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff"
   },
   message: {
-    marginTop: 15,
+    marginVertical: 15,
     textAlign: "center",
     color: "red"
+  },
+  dobInput: {
+    height: 50,
+    borderColor: "#ccc",
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 15,
+    marginBottom: 15,
+    backgroundColor: "#fff",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between"
   }
 });

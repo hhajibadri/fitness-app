@@ -1,4 +1,4 @@
-package com.movie.backend.model.repository;
+package com.movie.backend.repository;
 
 import java.util.List;
 import java.util.Optional;
@@ -12,6 +12,8 @@ import com.movie.backend.model.User;
 public interface UserRepository extends JpaRepository<User, Long> {
 
   Optional<User> findByEmail(String email);
+
+  boolean existsByEmail(String email);
   
   List<User> findWatchedMoviesById(Long movieId);
   

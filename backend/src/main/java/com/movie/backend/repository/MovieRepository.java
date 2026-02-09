@@ -1,4 +1,4 @@
-package com.movie.backend.model.repository;
+package com.movie.backend.repository;
 
 import java.util.List;
 

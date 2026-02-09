@@ -1,5 +1,10 @@
 package com.movie.backend.dto;
 
+import java.time.LocalDate;
+
+import com.movie.backend.validation.Adult;
+import com.movie.backend.validation.Password;
+
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;

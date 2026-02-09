@@ -1,5 +1,5 @@
 package com.movie.backend.dto;
 
-public class LoginResponse {
+public class RatingResponseDTO {
   
 }

@@ -13,6 +13,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.PrePersist;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -43,7 +44,7 @@ public class User {
 
   @Column(nullable = false, updatable = false)
   private LocalDateTime createdAt;
- 
+  
   @ManyToMany
   @JoinTable(
     name = "watched_movies",
@@ -51,4 +52,9 @@ public class User {
     inverseJoinColumns = @JoinColumn(name = "movie_id")
   )
   private Set<Movie> watchedMovies = new HashSet<>();
+
+  @PrePersist
+  protected void onCreate() {
+    this.createdAt = LocalDateTime.now();
+  }
 }

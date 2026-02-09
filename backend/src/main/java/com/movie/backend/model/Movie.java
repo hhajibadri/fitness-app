@@ -36,7 +36,7 @@ public class Movie {
   private Set<String> genres = new HashSet<>();
 
   @ElementCollection
-  private Set<String> cast = new HashSet<>();
+  private Set<String> casts = new HashSet<>();
 
   @Column(nullable = false)
   private LocalDate releaseDate;

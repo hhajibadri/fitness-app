@@ -23,7 +23,7 @@ public class MovieService {
 
   public Movie getMovieById(Long id) {
     return movieRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Movie not found with id " + id));
+        .orElseThrow(() -> new RuntimeException("Movie not found with id " + id));
   }
 
   public Movie createMovie(Movie movie) {
@@ -31,7 +31,7 @@ public class MovieService {
   }
 
   public Movie updateMovie(Movie movie) {
-      return movieRepository.save(movie);
+    return movieRepository.save(movie);
   }
 
   public void deleteMovie(Long id) {
@@ -40,20 +40,20 @@ public class MovieService {
 
   public List<Movie> filterByGenre(String genre) {
     return movieRepository.findAll().stream()
-            .filter(m -> m.getGenres().contains(genre))
-            .collect(Collectors.toList());
+        .filter(movie -> movie.getGenres().contains(genre))
+        .collect(Collectors.toList());
   }
 
   public List<Movie> filterByCast(String castMember) {
     return movieRepository.findAll().stream()
-            .filter(m -> m.getCasts().contains(castMember))
-            .collect(Collectors.toList());
+        .filter(movie -> movie.getCasts().contains(castMember))
+        .collect(Collectors.toList());
   }
 
   public List<Movie> filterByReleaseYear(int year) {
     return movieRepository.findAll().stream()
-            .filter(m -> m.getReleaseDate().getYear() == year)
-            .collect(Collectors.toList());
+        .filter(movie -> movie.getReleaseDate().getYear() == year)
+        .collect(Collectors.toList());
   }
-  
+
 }

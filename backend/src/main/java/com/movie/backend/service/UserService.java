@@ -1,6 +1,8 @@
 package com.movie.backend.service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -34,5 +36,12 @@ public class UserService {
   public boolean checkPassword(User user, String rawPassword) {
     return passwordEncoder.matches(rawPassword, user.getPassword());
   }
-  
+
+  public List<User> findWatchedMoviesById(Long movieId) {
+    return userRepository.findAll().stream()
+        .filter(user -> user.getWatchedMovies().stream()
+            .anyMatch(movie -> movie.getId().equals(movieId)))
+        .collect(Collectors.toList());
+  }
+
 }

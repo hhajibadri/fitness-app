@@ -1,21 +1,18 @@
 package com.fitness.backend.service;
 
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.fitness.backend.model.User;
 import com.fitness.backend.repository.UserRepository;
 
-import jakarta.transaction.Transactional;
-
 @Service
-@Transactional
 public class UserService {
   
   private final UserRepository userRepository;
-  private final BCryptPasswordEncoder passwordEncoder;
+  private final PasswordEncoder passwordEncoder;
 
-  public UserService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder) {
+  public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
     this.userRepository = userRepository;
     this.passwordEncoder = passwordEncoder;
   }

@@ -10,6 +10,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -31,9 +32,13 @@ public class Workout {
   private String name;
 
   @Column(nullable = false)
-  private LocalDateTime date;
+  @JoinColumn(name = "user_id")
+  private User user;
 
-  @OneToMany(mappedBy = "workoutExercise", cascade = CascadeType.ALL, orphanRemoval = true)
+  @Column(nullable = false)
+  private LocalDateTime timestamp;
+
+  @OneToMany(mappedBy = "workout", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<WorkoutExercise> exercises = new ArrayList<>();
 
 }

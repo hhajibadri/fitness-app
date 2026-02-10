@@ -1,10 +1,12 @@
 package com.fitness.backend.service;
 
-import com.fitness.backend.model.User;
-import com.fitness.backend.repository.UserRepository;
-import jakarta.transaction.Transactional;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import com.fitness.backend.model.User;
+import com.fitness.backend.repository.UserRepository;
+
+import jakarta.transaction.Transactional;
 
 @Service
 @Transactional
@@ -32,6 +34,10 @@ public class UserService {
   public User findByEmail(String email) {
     return userRepository.findByEmail(email)
             .orElseThrow(() -> new IllegalArgumentException("User not found"));
+  }
+
+  public boolean existsByEmail(String email) {
+    return userRepository.existsByEmail(email);
   }
 
   public boolean checkPassword(User user, String rawPassword) {

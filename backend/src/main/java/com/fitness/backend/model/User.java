@@ -51,7 +51,7 @@ public class User {
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
-  private Gender gender;
+  private Gender gender = Gender.UNSPECIFIED;
 
   @Column(nullable = false, updatable = false)
   private LocalDateTime createdAt;
@@ -61,7 +61,7 @@ public class User {
 
   @Column(nullable = false)
   private double weight;
-
+  
   private double bodyFatPercentage;
 
   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)

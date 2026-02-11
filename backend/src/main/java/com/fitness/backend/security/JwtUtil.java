@@ -8,6 +8,8 @@ import javax.crypto.SecretKey;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.fitness.backend.model.User;
+
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -31,12 +33,14 @@ public class JwtUtil {
     this.key = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
   }
 
-  public String generateToken(String email) {
+  public String generateToken(User user) {
     Date currentTime = new Date();
     Date expirationTime = new Date(currentTime.getTime() + jwtExpirationMs);
     return Jwts
             .builder()
-            .subject(email)
+            .subject(user.getEmail())
+            .claim("id", user.getId())
+            .claim("role", user.getRole())
             .issuedAt(currentTime)
             .expiration(expirationTime)
             .signWith(key)

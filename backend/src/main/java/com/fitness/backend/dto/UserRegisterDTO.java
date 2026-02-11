@@ -9,8 +9,10 @@ import com.fitness.backend.validation.Password;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
+import lombok.Data;
 
-public class UserCreateDTO {
+@Data
+public class UserRegisterDTO {
   
   private String name;
 
@@ -32,4 +34,7 @@ public class UserCreateDTO {
 
   @Positive(message = "Weight must be positive")
   private double weight;
+
+  @Positive(message = "Bodyfat must be positive")
+  private double bodyFatPercentage;
 }

@@ -3,19 +3,21 @@ package com.fitness.backend.service;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.fitness.backend.dto.AuthResponseDTO;
 import com.fitness.backend.model.User;
 import com.fitness.backend.repository.UserRepository;
+import com.fitness.backend.security.JwtUtil;
+
+import lombok.AllArgsConstructor;
 
 @Service
+@AllArgsConstructor
 public class UserService {
   
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
+  private final JwtUtil jwtUtil;
 
-  public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
-    this.userRepository = userRepository;
-    this.passwordEncoder = passwordEncoder;
-  }
 
   public User registerUser(User user) {
 
@@ -26,6 +28,16 @@ public class UserService {
     String hashedPassword = passwordEncoder.encode(user.getPassword());
     user.setPassword(hashedPassword);
     return userRepository.save(user);
+  }
+
+  public String loginUser(User user) {
+
+    User potentialUser = userRepository.findByEmail(user.getEmail()).orElseThrow(() -> new IllegalArgumentException("Invalid credentials"));
+
+    if (!passwordEncoder.matches(user.getPassword(), potentialUser.getPassword())) {
+      throw new IllegalArgumentException("Invalid credentials");
+    }
+
   }
 
   public User findByEmail(String email) {

@@ -3,7 +3,9 @@ package com.fitness.backend.service;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.fitness.backend.dto.AuthResponseDTO;
+import com.fitness.backend.dto.UserLoginRequestDTO;
+import com.fitness.backend.dto.UserLoginResultDTO;
+import com.fitness.backend.dto.UserRegisterRequestDTO;
 import com.fitness.backend.model.User;
 import com.fitness.backend.repository.UserRepository;
 import com.fitness.backend.security.JwtUtil;
@@ -19,38 +21,44 @@ public class UserService {
   private final JwtUtil jwtUtil;
 
 
-  public User registerUser(User user) {
+  public void registerUser(UserRegisterRequestDTO userRegisterRequestDTO) {
 
-    if (userRepository.existsByEmail(user.getEmail())) {
+    if (userRepository.existsByEmail(userRegisterRequestDTO.getEmail())) {
       throw new IllegalArgumentException("Email already in use");
     }
-
-    String hashedPassword = passwordEncoder.encode(user.getPassword());
-    user.setPassword(hashedPassword);
-    return userRepository.save(user);
+    String hashedPassword = passwordEncoder.encode(userRegisterRequestDTO.getPassword());
+    User user = User.builder()
+                  .name(userRegisterRequestDTO.getName())
+                  .email(userRegisterRequestDTO.getEmail())
+                  .password(hashedPassword)
+                  .dateOfBirth(userRegisterRequestDTO.getDateOfBirth())
+                  .gender(userRegisterRequestDTO.getGender())
+                  .height(userRegisterRequestDTO.getHeight())
+                  .weight(userRegisterRequestDTO.getWeight())
+                  .bodyFatPercentage(userRegisterRequestDTO.getBodyFatPercentage())
+                  .build();
+    userRepository.save(user);
   }
 
-  public String loginUser(User user) {
+  public UserLoginResultDTO loginUser(UserLoginRequestDTO userLoginRequestDTO) {
 
-    User potentialUser = userRepository.findByEmail(user.getEmail()).orElseThrow(() -> new IllegalArgumentException("Invalid credentials"));
-
-    if (!passwordEncoder.matches(user.getPassword(), potentialUser.getPassword())) {
+    User potentialUser = userRepository.findByEmail(userLoginRequestDTO.getEmail()).orElseThrow(() -> new IllegalArgumentException("Invalid credentials"));
+    if (!passwordEncoder.matches(userLoginRequestDTO.getPassword(), potentialUser.getPassword())) {
       throw new IllegalArgumentException("Invalid credentials");
     }
 
+    String token = jwtUtil.generateToken(potentialUser);
+
+    return new UserLoginResultDTO(
+      potentialUser.getId(),
+      potentialUser.getRole(),
+      token
+    );
+
   }
 
-  public User findByEmail(String email) {
-    return userRepository.findByEmail(email)
-            .orElseThrow(() -> new IllegalArgumentException("User not found"));
-  }
-
-  public boolean existsByEmail(String email) {
-    return userRepository.existsByEmail(email);
-  }
-
-  public boolean checkPassword(User user, String rawPassword) {
-    return passwordEncoder.matches(rawPassword, user.getPassword());
+  public User getUserByEmail(String email) {
+    return userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("User not found"));
   }
 
 }

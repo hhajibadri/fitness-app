@@ -12,7 +12,7 @@ import jakarta.validation.constraints.Positive;
 import lombok.Data;
 
 @Data
-public class UserRegisterDTO {
+public class UserRegisterRequestDTO {
   
   private String name;
 

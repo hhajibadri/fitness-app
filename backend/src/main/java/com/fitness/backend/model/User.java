@@ -20,11 +20,13 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
+@Builder
 @Getter
 @Setter
 @NoArgsConstructor
@@ -38,6 +40,7 @@ public class User {
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
+  @Builder.Default
   private Role role = Role.USER;
 
   private String name;
@@ -53,6 +56,7 @@ public class User {
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
+  @Builder.Default
   private Gender gender = Gender.UNSPECIFIED;
 
   @Column(nullable = false, updatable = false)
@@ -67,6 +71,7 @@ public class User {
   private double bodyFatPercentage;
 
   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+  @Builder.Default
   private List<Workout> workouts = new ArrayList<>();
 
   @PrePersist

@@ -47,7 +47,7 @@ public class JwtUtil {
             .compact();
   }
 
-  public String getUserFromToken(String token) {
+  public String getEmailFromToken(String token) {
     return Jwts
             .parser()
             .verifyWith(key)

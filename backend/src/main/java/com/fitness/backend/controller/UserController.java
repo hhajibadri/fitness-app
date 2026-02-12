@@ -2,17 +2,21 @@ package com.fitness.backend.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fitness.backend.dto.UserLoginDTO;
-import com.fitness.backend.dto.UserRegisterDTO;
-import com.fitness.backend.model.User;
+import com.fitness.backend.dto.UserLoginRequestDTO;
+import com.fitness.backend.dto.UserLoginResponseDTO;
+import com.fitness.backend.dto.UserLoginResultDTO;
+import com.fitness.backend.dto.UserRegisterRequestDTO;
 import com.fitness.backend.service.UserService;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 
 
@@ -26,6 +30,13 @@ public class UserController {
     this.userService = userService;
   }
 
+  @ExceptionHandler(Exception.class)
+  public ResponseEntity<String> handleServerError(Exception ex) {
+    return ResponseEntity
+            .status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body("Unexpected server error");
+  }
+
   @ExceptionHandler(IllegalArgumentException.class)
   public ResponseEntity<String> handleBadRequest(IllegalArgumentException ex) {
     return ResponseEntity
@@ -33,31 +44,31 @@ public class UserController {
             .body(ex.getMessage());
   }
 
-  public ResponseEntity<String> handleServerError(Exception ex) {
-    return ResponseEntity.
-            status(HttpStatus.INTERNAL_SERVER_ERROR)
-            .body("Unexpected server error");
-  }
-
   @PostMapping("/register")
-  public ResponseEntity<Void> registerUser(@Valid @RequestBody UserRegisterDTO userRegisterDTO) {
-    User user = new User();
-    user.setName(userRegisterDTO.getName());
-    user.setEmail(userRegisterDTO.getEmail());
-    user.setDateOfBirth(userRegisterDTO.getDateOfBirth());
-    user.setGender(userRegisterDTO.getGender());
-    user.setHeight(userRegisterDTO.getHeight());
-    user.setWeight(userRegisterDTO.getWeight());
-    user.setBodyFatPercentage(userRegisterDTO.getBodyFatPercentage());
-    userService.registerUser(user);
+  public ResponseEntity<Void> registerUser(@Valid @RequestBody UserRegisterRequestDTO userRegisterRequestDTO) {
+    userService.registerUser(userRegisterRequestDTO);
     return ResponseEntity.status(HttpStatus.CREATED).build();
   }
 
   @PostMapping("/login")
-  public ResponseEntity<String> loginUser(@Valid @RequestBody UserLoginDTO userLoginDTO) {
-
-    return ResponseEntity.status(HttpStatus.OK).build();
+  public ResponseEntity<UserLoginResponseDTO> loginUser(@Valid @RequestBody UserLoginRequestDTO userLoginRequestDTO, HttpServletResponse httpResponse) {
+    UserLoginResultDTO userLoginResultDTO = userService.loginUser(userLoginRequestDTO);
+    Cookie cookie = new Cookie("access_token", userLoginResultDTO.getToken());
+    cookie.setHttpOnly(true);
+    cookie.setSecure(true);
+    cookie.setPath("/");
+    cookie.setMaxAge(60 * 60); // 1 hour
+    httpResponse.addCookie(cookie);
+    return ResponseEntity.ok(new UserLoginResponseDTO(userLoginResultDTO.getUserId(), userLoginResultDTO.getRole()));
   }
+
+  @DeleteMapping("/delete")
+  public String postMethodName(@Valid @RequestBody String entity) {
+      //TODO: process POST request
+      
+      return entity;
+  }
+  
   
   
 }

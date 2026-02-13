@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import com.fitness.backend.dto.UserLoginRequestDTO;
 import com.fitness.backend.dto.UserLoginResultDTO;
 import com.fitness.backend.dto.UserRegisterRequestDTO;
+import com.fitness.backend.enums.Role;
 import com.fitness.backend.model.User;
 import com.fitness.backend.repository.UserRepository;
 import com.fitness.backend.security.JwtUtil;
@@ -54,6 +55,22 @@ public class UserService {
       potentialUser.getRole(),
       token
     );
+
+  }
+
+  public void deleteUser(Long targetUserId, String requesterEmail) {
+
+    User requester = userRepository.findByEmail(requesterEmail).orElseThrow(() -> new IllegalArgumentException("User not found"));
+    User target = userRepository.findById(targetUserId).orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+    boolean isAdmin = requester.getRole() == Role.ADMIN;
+    boolean isSelf = requester.getId().equals(target.getId());
+
+    if (!isAdmin && !isSelf) {
+      throw new IllegalArgumentException("Not authorized to delete user");
+    }
+
+    userRepository.delete(target);
 
   }
 

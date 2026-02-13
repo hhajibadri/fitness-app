@@ -1,5 +1,6 @@
 package com.fitness.backend.model;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import com.fitness.backend.enums.Muscle;
@@ -14,6 +15,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -22,6 +25,8 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Exercise {
   
   @Id
@@ -34,5 +39,6 @@ public class Exercise {
   @ElementCollection(targetClass = Muscle.class)
   @Enumerated(EnumType.STRING)
   @CollectionTable(name = "exercise_muscles", joinColumns = @JoinColumn(name = "exercise_id"))
-  private Set<Muscle> muscles;
+  @Builder.Default
+  private Set<Muscle> muscles = new HashSet<>();
 }

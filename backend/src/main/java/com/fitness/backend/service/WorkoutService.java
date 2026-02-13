@@ -19,12 +19,13 @@ import com.fitness.backend.repository.WorkoutRepository;
 
 @Service
 public class WorkoutService {
-  
+
   private final WorkoutRepository workoutRepository;
   private final ExerciseRepository exerciseRepository;
   private final UserRepository userRepository;
 
-  public WorkoutService(WorkoutRepository workoutRepository, ExerciseRepository exerciseRepository, UserRepository userRepository) {
+  public WorkoutService(WorkoutRepository workoutRepository, ExerciseRepository exerciseRepository,
+      UserRepository userRepository) {
     this.workoutRepository = workoutRepository;
     this.exerciseRepository = exerciseRepository;
     this.userRepository = userRepository;
@@ -33,25 +34,28 @@ public class WorkoutService {
   public Workout createWorkout(WorkoutDTO workoutDTO) {
 
     User user = userRepository.findById(workoutDTO.getUser_id())
-              .orElseThrow(() -> new RuntimeException("User not found"));
+        .orElseThrow(() -> new RuntimeException("User not found"));
 
-    Workout workout = new Workout();
-    workout.setName(workoutDTO.getName());
-    workout.setTimestamp(LocalDateTime.now());
-    workout.setUser(user);
+    Workout workout = Workout.builder()
+        .name(workoutDTO.getName())
+        .timestamp(LocalDateTime.now())
+        .user(user)
+        .build();
 
     for (WorkoutExerciseDTO exerciseDTO : workoutDTO.getExercises()) {
-      Exercise exercise = exerciseRepository.findById(exerciseDTO.getExerciseId()).orElseThrow(() -> new RuntimeException("Exercise not found with id: " + exerciseDTO.getExerciseId()));
+      Exercise exercise = exerciseRepository.findById(exerciseDTO.getExerciseId())
+          .orElseThrow(() -> new RuntimeException("Exercise not found with id: " + exerciseDTO.getExerciseId()));
 
-      WorkoutExercise workoutExercise = new WorkoutExercise();
-      workoutExercise.setWorkout(workout);
-      workoutExercise.setExercise(exercise);
+      WorkoutExercise workoutExercise = WorkoutExercise.builder()
+          .workout(workout)
+          .exercise(exercise)
+          .build();
 
       for (SetEntryDTO setEntryDTO : exerciseDTO.getSets()) {
-        SetEntry setEntry = new SetEntry();
-        setEntry.setReps(setEntryDTO.getReps());
-        setEntryDTO.setWeight(setEntryDTO.getWeight());
-        setEntry.setWorkoutExercise(workoutExercise);
+        SetEntry setEntry = SetEntry.builder()
+            .reps(setEntryDTO.getReps())
+            .weight(setEntryDTO.getWeight())
+            .build();
         workoutExercise.getSets().add(setEntry);
       }
 
@@ -63,7 +67,11 @@ public class WorkoutService {
 
   public Workout getWorkoutById(Long id) {
     return workoutRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Workout not found with id: " + id));
+        .orElseThrow(() -> new IllegalArgumentException("Workout not found"));
+  }
+
+  public void deleteWorkout(Long id) {
+    workoutRepository.deleteById(id);
   }
 
   public List<Workout> getAllWorkouts() {

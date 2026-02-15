@@ -16,11 +16,10 @@ import lombok.AllArgsConstructor;
 @Service
 @AllArgsConstructor
 public class UserService {
-  
+
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
   private final JwtUtil jwtUtil;
-
 
   public void registerUser(UserRegisterRequestDTO userRegisterRequestDTO) {
 
@@ -29,21 +28,22 @@ public class UserService {
     }
     String hashedPassword = passwordEncoder.encode(userRegisterRequestDTO.getPassword());
     User user = User.builder()
-                  .name(userRegisterRequestDTO.getName())
-                  .email(userRegisterRequestDTO.getEmail())
-                  .password(hashedPassword)
-                  .dateOfBirth(userRegisterRequestDTO.getDateOfBirth())
-                  .gender(userRegisterRequestDTO.getGender())
-                  .height(userRegisterRequestDTO.getHeight())
-                  .weight(userRegisterRequestDTO.getWeight())
-                  .bodyFatPercentage(userRegisterRequestDTO.getBodyFatPercentage())
-                  .build();
+        .name(userRegisterRequestDTO.getName())
+        .email(userRegisterRequestDTO.getEmail())
+        .password(hashedPassword)
+        .dateOfBirth(userRegisterRequestDTO.getDateOfBirth())
+        .gender(userRegisterRequestDTO.getGender())
+        .height(userRegisterRequestDTO.getHeight())
+        .weight(userRegisterRequestDTO.getWeight())
+        .bodyFatPercentage(userRegisterRequestDTO.getBodyFatPercentage())
+        .build();
     userRepository.save(user);
   }
 
   public UserLoginResultDTO loginUser(UserLoginRequestDTO userLoginRequestDTO) {
 
-    User potentialUser = userRepository.findByEmail(userLoginRequestDTO.getEmail()).orElseThrow(() -> new IllegalArgumentException("Invalid credentials"));
+    User potentialUser = userRepository.findByEmail(userLoginRequestDTO.getEmail())
+        .orElseThrow(() -> new IllegalArgumentException("Invalid credentials"));
     if (!passwordEncoder.matches(userLoginRequestDTO.getPassword(), potentialUser.getPassword())) {
       throw new IllegalArgumentException("Invalid credentials");
     }
@@ -51,17 +51,18 @@ public class UserService {
     String token = jwtUtil.generateToken(potentialUser);
 
     return new UserLoginResultDTO(
-      potentialUser.getId(),
-      potentialUser.getRole(),
-      token
-    );
+        potentialUser.getId(),
+        potentialUser.getRole(),
+        token);
 
   }
 
   public void deleteUser(Long targetUserId, String requesterEmail) {
 
-    User requester = userRepository.findByEmail(requesterEmail).orElseThrow(() -> new IllegalArgumentException("User not found"));
-    User target = userRepository.findById(targetUserId).orElseThrow(() -> new IllegalArgumentException("User not found"));
+    User requester = userRepository.findByEmail(requesterEmail)
+        .orElseThrow(() -> new IllegalArgumentException("User not found"));
+    User target = userRepository.findById(targetUserId)
+        .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
     boolean isAdmin = requester.getRole() == Role.ADMIN;
     boolean isSelf = requester.getId().equals(target.getId());

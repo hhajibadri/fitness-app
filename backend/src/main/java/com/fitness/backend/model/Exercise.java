@@ -28,7 +28,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder
 public class Exercise {
-  
+
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;

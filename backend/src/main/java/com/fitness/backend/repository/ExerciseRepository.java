@@ -10,7 +10,7 @@ import com.fitness.backend.model.Exercise;
 
 @Repository
 public interface ExerciseRepository extends JpaRepository<Exercise, Long> {
-  
+
   Optional<Exercise> findByName(String name);
 
   List<Exercise> findByNameContainingIgnoreCase(String partialName);

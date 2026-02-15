@@ -47,7 +47,7 @@ public class User {
 
   @Column(nullable = false, unique = true)
   private String email;
-  
+
   @Column(nullable = false)
   private String password;
 
@@ -67,7 +67,7 @@ public class User {
 
   @Column(nullable = false)
   private double weight;
-  
+
   private double bodyFatPercentage;
 
   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -78,5 +78,5 @@ public class User {
   protected void init() {
     this.createdAt = LocalDateTime.now();
   }
-  
+
 }

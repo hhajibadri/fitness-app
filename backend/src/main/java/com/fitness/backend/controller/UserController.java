@@ -21,7 +21,6 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 
-
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
@@ -35,15 +34,15 @@ public class UserController {
   @ExceptionHandler(Exception.class)
   public ResponseEntity<String> handleServerError(Exception ex) {
     return ResponseEntity
-            .status(HttpStatus.INTERNAL_SERVER_ERROR)
-            .body("Unexpected server error");
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .body("Unexpected server error");
   }
 
   @ExceptionHandler(IllegalArgumentException.class)
   public ResponseEntity<String> handleBadRequest(IllegalArgumentException ex) {
     return ResponseEntity
-            .status(HttpStatus.BAD_REQUEST)
-            .body(ex.getMessage());
+        .status(HttpStatus.BAD_REQUEST)
+        .body(ex.getMessage());
   }
 
   @PostMapping("/register")
@@ -53,7 +52,8 @@ public class UserController {
   }
 
   @PostMapping("/login")
-  public ResponseEntity<UserLoginResponseDTO> loginUser(@Valid @RequestBody UserLoginRequestDTO userLoginRequestDTO, HttpServletResponse httpResponse) {
+  public ResponseEntity<UserLoginResponseDTO> loginUser(@Valid @RequestBody UserLoginRequestDTO userLoginRequestDTO,
+      HttpServletResponse httpResponse) {
     UserLoginResultDTO userLoginResultDTO = userService.loginUser(userLoginRequestDTO);
     Cookie cookie = new Cookie("access_token", userLoginResultDTO.getToken());
     cookie.setHttpOnly(true);
@@ -66,11 +66,9 @@ public class UserController {
 
   @DeleteMapping("/{id}")
   public ResponseEntity<Void> deleteUser(@PathVariable Long id, Authentication authentication) {
-      String requesterEmail = authentication.getName();
-      userService.deleteUser(id, requesterEmail);
-      return ResponseEntity.noContent().build();
+    String requesterEmail = authentication.getName();
+    userService.deleteUser(id, requesterEmail);
+    return ResponseEntity.noContent().build();
   }
-  
-  
-  
+
 }

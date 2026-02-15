@@ -46,4 +46,3 @@ public class Workout {
   private List<WorkoutExercise> exercises = new ArrayList<>();
 
 }
-

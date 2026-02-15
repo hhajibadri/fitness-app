@@ -17,7 +17,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-
 @Entity
 @Getter
 @Setter
@@ -41,5 +40,5 @@ public class WorkoutExercise {
   @Builder.Default
   @OneToMany(mappedBy = "workoutExercise", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<SetEntry> sets = new ArrayList<>();
-    
+
 }

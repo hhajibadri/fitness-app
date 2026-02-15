@@ -13,7 +13,7 @@ import lombok.Data;
 
 @Data
 public class UserRegisterRequestDTO {
-  
+
   private String name;
 
   @NotBlank(message = "Must enter email")
@@ -26,7 +26,7 @@ public class UserRegisterRequestDTO {
 
   @Adult
   private LocalDate dateOfBirth;
-  
+
   private Gender gender;
 
   @Positive(message = "Height must be positive")

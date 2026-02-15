@@ -16,7 +16,9 @@ import jakarta.validation.Payload;
 public @interface Adult {
 
   String message() default "Must be at least 18 years old";
+
   Class<?>[] groups() default {};
+
   Class<? extends Payload>[] payload() default {};
-  
+
 }

@@ -10,7 +10,7 @@ import com.fitness.backend.model.Workout;
 
 @Repository
 public interface WorkoutRepository extends JpaRepository<Workout, Long> {
-  
+
   List<Workout> findByUser(User user);
 
   List<Workout> findByUserOrderByTimestampDesc(User user);

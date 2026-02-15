@@ -37,30 +37,30 @@ public class JwtUtil {
     Date currentTime = new Date();
     Date expirationTime = new Date(currentTime.getTime() + jwtExpirationMs);
     return Jwts
-            .builder()
-            .subject(user.getEmail())
-            .claim("id", user.getId())
-            .claim("role", user.getRole())
-            .issuedAt(currentTime)
-            .expiration(expirationTime)
-            .signWith(key)
-            .compact();
+        .builder()
+        .subject(user.getEmail())
+        .claim("id", user.getId())
+        .claim("role", user.getRole())
+        .issuedAt(currentTime)
+        .expiration(expirationTime)
+        .signWith(key)
+        .compact();
   }
 
   public String getEmailFromToken(String token) {
     return Jwts
-            .parser()
-            .verifyWith(key)
-            .build()
-            .parseSignedClaims(token)
-            .getPayload()
-            .getSubject();
+        .parser()
+        .verifyWith(key)
+        .build()
+        .parseSignedClaims(token)
+        .getPayload()
+        .getSubject();
   }
 
   public boolean validateJwtToken(String token) {
     try {
-        Jwts.parser().verifyWith(key).build().parseSignedClaims(token);
-        return true;
+      Jwts.parser().verifyWith(key).build().parseSignedClaims(token);
+      return true;
     } catch (JwtException | IllegalArgumentException e) {
       log.error("JWT validation error: {}", e.getMessage());
     }

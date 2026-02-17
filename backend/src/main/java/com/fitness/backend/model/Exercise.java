@@ -3,6 +3,7 @@ package com.fitness.backend.model;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.fitness.backend.enums.ExerciseName;
 import com.fitness.backend.enums.Muscle;
 
 import jakarta.persistence.CollectionTable;
@@ -30,7 +31,8 @@ public class Exercise {
   private Long id;
 
   @Column(nullable = false)
-  private String name;
+  @Enumerated(EnumType.STRING)
+  private ExerciseName exerciseName;
 
   @ElementCollection(targetClass = Muscle.class)
   @Enumerated(EnumType.STRING)

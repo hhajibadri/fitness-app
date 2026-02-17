@@ -24,16 +24,21 @@ import com.fitness.backend.repository.UserRepository;
 import com.fitness.backend.security.JwtUtil;
 
 import jakarta.transaction.Transactional;
-import lombok.AllArgsConstructor;
 
 @Service
-@AllArgsConstructor
 public class UserService {
 
-  private final UserRepository userRepository;
-  private final PasswordEncoder passwordEncoder;
   private final JwtUtil jwtUtil;
+  private final PasswordEncoder passwordEncoder;
   private final RefreshTokenService refreshTokenService;
+  private final UserRepository userRepository;
+
+  public UserService(JwtUtil jwtUtil, PasswordEncoder passwordEncoder, RefreshTokenService refreshTokenService, UserRepository userRepository) {
+    this.jwtUtil = jwtUtil;
+    this.passwordEncoder = passwordEncoder;
+    this.refreshTokenService = refreshTokenService;
+    this.userRepository = userRepository;
+  }
 
   @Transactional
   public void registerUser(UserRegisterRequest userRegisterRequest) {
@@ -75,7 +80,6 @@ public class UserService {
         user.getId(),
         user.getRole().name(),
         accessToken,
-        "Bearer",
         accessTokenTTL,
         refreshToken.getToken(),
         refreshTokenTTL,

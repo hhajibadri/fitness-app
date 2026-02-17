@@ -38,6 +38,6 @@ public class Workout {
   private LocalDateTime timestamp;
 
   @OneToMany(mappedBy = "workout", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<WorkoutExercise> exercises = new ArrayList<>();
+  private List<WorkoutExercise> workoutExercises = new ArrayList<>();
 
 }

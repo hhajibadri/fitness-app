@@ -1,12 +1,12 @@
 package com.fitness.backend.dto;
 
-public record UserLoginResponse (
-  long userId,
+public record UserDetail (
+  Long userId,
   String role,
   String accessToken,
-  long accessExpiresInSeconds,
+  Long accessExpiresInSeconds,
   String refreshToken,
-  long refreshExpiresInSeconds,
+  Long refreshExpiresInSeconds,
   String issuedAtIso,
   UserProfileDetail userProfile
 ) {}

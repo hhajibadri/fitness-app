@@ -6,17 +6,19 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fitness.backend.dto.BasicUserDetail;
 import com.fitness.backend.dto.RefreshRequest;
 import com.fitness.backend.dto.RefreshResponse;
 import com.fitness.backend.dto.UserLoginRequest;
-import com.fitness.backend.dto.UserLoginResponse;
+import com.fitness.backend.dto.UserDetail;
 import com.fitness.backend.dto.UserRegisterRequest;
 import com.fitness.backend.model.RefreshToken;
 import com.fitness.backend.security.JwtUtil;
@@ -42,11 +44,12 @@ public class UserController {
     this.jwtUtil = jwtUtil;
   }
 
-  @ExceptionHandler(Exception.class)
-  public ResponseEntity<String> handleServerError(Exception ex) {
-    return ResponseEntity
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .body("Unexpected server error");
+  @GetMapping("/me")
+  public ResponseEntity<BasicUserDetail> getUser(Authentication authentication,
+      HttpServletResponse httpServletResponse) {
+    String userEmail = authentication.getName();
+    BasicUserDetail basicUserDetail = userService.getUserDetail(userEmail);
+    return ResponseEntity.ok(basicUserDetail);
   }
 
   @PostMapping("/register")
@@ -56,10 +59,10 @@ public class UserController {
   }
 
   @PostMapping("/login")
-  public ResponseEntity<UserLoginResponse> loginUser(@Valid @RequestBody UserLoginRequest userLoginRequest,
+  public ResponseEntity<UserDetail> loginUser(@Valid @RequestBody UserLoginRequest userLoginRequest,
       HttpServletResponse httpResponse) {
-    UserLoginResponse userLoginResultDTO = userService.loginUser(userLoginRequest);
-    return ResponseEntity.ok(userLoginResultDTO);
+    UserDetail userDetail = userService.loginUser(userLoginRequest);
+    return ResponseEntity.ok(userDetail);
   }
 
   @PostMapping("/refresh")

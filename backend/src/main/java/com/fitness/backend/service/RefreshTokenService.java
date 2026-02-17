@@ -68,10 +68,10 @@ public class RefreshTokenService {
 
   public String hashToken(String token) {
     try {
-      MessageDigest digest = MessageDigest.getInstance("SHA-256");
-      byte[] hash = digest.digest(token.getBytes(StandardCharsets.UTF_8));
-      return Base64.getEncoder().encodeToString(hash);
-    } catch(NoSuchAlgorithmException e) {
+    MessageDigest digest = MessageDigest.getInstance("SHA-256");
+    byte[] hash = digest.digest(token.getBytes(StandardCharsets.UTF_8));
+    return Base64.getEncoder().encodeToString(hash);
+    } catch (NoSuchAlgorithmException e) {
       throw new RuntimeException("SHA-256 algorithm not available", e);
     }
   }

@@ -8,8 +8,10 @@ import java.util.Optional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.fitness.backend.dto.BasicUserDetail;
+import com.fitness.backend.dto.UpdateEmailRequest;
+import com.fitness.backend.dto.UserDetail;
 import com.fitness.backend.dto.UserLoginRequest;
-import com.fitness.backend.dto.UserLoginResponse;
 import com.fitness.backend.dto.UserProfileDetail;
 import com.fitness.backend.dto.UserRegisterRequest;
 import com.fitness.backend.enums.Role;
@@ -33,11 +35,54 @@ public class UserService {
   private final RefreshTokenService refreshTokenService;
   private final UserRepository userRepository;
 
-  public UserService(JwtUtil jwtUtil, PasswordEncoder passwordEncoder, RefreshTokenService refreshTokenService, UserRepository userRepository) {
+  public UserService(JwtUtil jwtUtil, PasswordEncoder passwordEncoder, RefreshTokenService refreshTokenService,
+      UserRepository userRepository) {
     this.jwtUtil = jwtUtil;
     this.passwordEncoder = passwordEncoder;
     this.refreshTokenService = refreshTokenService;
     this.userRepository = userRepository;
+  }
+
+  @Transactional
+  public void updateEmail(String currentEmail, UpdateEmailRequest request) {
+
+    User user = userRepository.findByEmail(currentEmail)
+        .orElseThrow(UserNotFoundException::new);
+
+    if (!passwordEncoder.matches(request.password(), user.getPassword())) {
+      throw new UnauthorizedActionException();
+    }
+
+    if (user.getEmail().equals(request.newEmail())) {
+      return;
+    }
+
+    if (userRepository.existsByEmail(request.newEmail())) {
+      throw new EmailAlreadyInUseException();
+    }
+
+    user.setEmail(request.newEmail());
+    refreshTokenService.deleteByUser(user);
+  }
+
+  public BasicUserDetail getUserDetail(String email) {
+
+    User user = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
+
+    UserProfile profile = user.getUserProfile();
+
+    return new BasicUserDetail(
+        user.getId(),
+        user.getRole().name(),
+        new UserProfileDetail(
+            user.getName(),
+            user.getEmail(),
+            profile.getDateOfBirth().format(DateTimeFormatter.ISO_DATE),
+            profile.getGender().name(),
+            profile.getHeight(),
+            profile.getWeight(),
+            profile.getBodyFatPercentage()));
+
   }
 
   @Transactional
@@ -47,19 +92,30 @@ public class UserService {
     }
     String hashedPassword = passwordEncoder.encode(userRegisterRequest.password());
     User user = new User();
+    UserProfile userProfile = new UserProfile();
+
     user.setName(userRegisterRequest.name());
     user.setEmail(userRegisterRequest.email());
     user.setPassword(hashedPassword);
+    user.setUserProfile(userProfile);
+
+    userProfile.setUser(user);
+    userProfile.setDateOfBirth(userRegisterRequest.dateOfBirth());
+    userProfile.setGender(userRegisterRequest.gender());
+    userProfile.setHeight(userRegisterRequest.height());
+    userProfile.setWeight(userRegisterRequest.weight());
+    userProfile.setBodyFatPercentage(userRegisterRequest.bodyFatPercentage());
+
     userRepository.save(user);
   }
 
   @Transactional
-  public UserLoginResponse loginUser(UserLoginRequest userLoginRequestDTO) {
+  public UserDetail loginUser(UserLoginRequest userLoginRequest) {
 
-    User user = userRepository.findByEmail(userLoginRequestDTO.email())
+    User user = userRepository.findByEmail(userLoginRequest.email())
         .orElseThrow(() -> new InvalidCredentialsException());
 
-    if (!passwordEncoder.matches(userLoginRequestDTO.password(), user.getPassword())) {
+    if (!passwordEncoder.matches(userLoginRequest.password(), user.getPassword())) {
       throw new InvalidCredentialsException();
     }
 
@@ -76,7 +132,7 @@ public class UserService {
 
     String issuedAtIso = jwtUtil.getIssuedAt(accessToken).toString();
 
-    return new UserLoginResponse(
+    return new UserDetail(
         user.getId(),
         user.getRole().name(),
         accessToken,
@@ -103,10 +159,10 @@ public class UserService {
   @Transactional
   public void deleteUser(Long targetUserId, String requesterEmail) {
     User requester = userRepository.findByEmail(requesterEmail)
-        .orElseThrow(() -> new UserNotFoundException());
+        .orElseThrow(UserNotFoundException::new);
     User target = userRepository.findById(targetUserId)
-        .orElseThrow(() -> new UserNotFoundException());
-    boolean isAdmin = requester.getRole().equals(Role.ADMIN);
+        .orElseThrow(UserNotFoundException::new);
+    boolean isAdmin = requester.getRole() == Role.ADMIN;
     boolean isSelf = requester.getId().equals(target.getId());
 
     if (!isAdmin && !isSelf) {
@@ -118,7 +174,7 @@ public class UserService {
   }
 
   public User getUserByEmail(String email) {
-    return userRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException());
+    return userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
   }
 
 }

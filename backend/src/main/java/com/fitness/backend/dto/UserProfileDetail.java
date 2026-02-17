@@ -5,7 +5,7 @@ public record UserProfileDetail(
   String email,
   String dateOfBirthIso,
   String gender,
-  double height,
-  double weight,
-  double bodyFatPercentage
+  Double height,
+  Double weight,
+  Double bodyFatPercentage
 ) {}

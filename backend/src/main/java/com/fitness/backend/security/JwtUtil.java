@@ -1,7 +1,8 @@
 package com.fitness.backend.security;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Date;
+import java.time.Duration;
+import java.time.Instant;
 
 import javax.crypto.SecretKey;
 
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import com.fitness.backend.model.User;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -23,8 +25,7 @@ public class JwtUtil {
   @Value("${jwt.secret}")
   private String jwtSecret;
 
-  @Value("${jwt.expiration}")
-  private long jwtExpirationMs;
+  private final Duration jwtDuration = Duration.ofMinutes(15);
 
   private SecretKey key;
 
@@ -34,15 +35,15 @@ public class JwtUtil {
   }
 
   public String generateToken(User user) {
-    Date currentTime = new Date();
-    Date expirationTime = new Date(currentTime.getTime() + jwtExpirationMs);
+    Instant currentTime = Instant.now();
+    Instant expirationTime = currentTime.plus(jwtDuration);
     return Jwts
         .builder()
         .subject(user.getEmail())
         .claim("id", user.getId())
         .claim("role", user.getRole())
-        .issuedAt(currentTime)
-        .expiration(expirationTime)
+        .issuedAt(java.util.Date.from(currentTime))
+        .expiration(java.util.Date.from(expirationTime))
         .signWith(key)
         .compact();
   }
@@ -65,6 +66,24 @@ public class JwtUtil {
       log.error("JWT validation error: {}", e.getMessage());
     }
     return false;
+  }
+
+  public Instant getExpiry(String token) {
+    Claims claims = Jwts.parser()
+        .verifyWith(key)
+        .build()
+        .parseSignedClaims(token)
+        .getPayload();
+    return claims.getExpiration().toInstant();
+  }
+
+  public Instant getIssuedAt(String token) {
+    Claims claims = Jwts.parser()
+        .verifyWith(key)
+        .build()
+        .parseSignedClaims(token)
+        .getPayload();
+    return claims.getIssuedAt().toInstant();
   }
 
 }

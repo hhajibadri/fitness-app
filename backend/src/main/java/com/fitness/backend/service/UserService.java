@@ -1,16 +1,29 @@
 package com.fitness.backend.service;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
+import java.util.Optional;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.fitness.backend.dto.UserLoginRequestDTO;
-import com.fitness.backend.dto.UserLoginResultDTO;
-import com.fitness.backend.dto.UserRegisterRequestDTO;
+import com.fitness.backend.dto.UserLoginRequest;
+import com.fitness.backend.dto.UserLoginResponse;
+import com.fitness.backend.dto.UserProfileDetail;
+import com.fitness.backend.dto.UserRegisterRequest;
 import com.fitness.backend.enums.Role;
+import com.fitness.backend.exception.EmailAlreadyInUseException;
+import com.fitness.backend.exception.InvalidCredentialsException;
+import com.fitness.backend.exception.UnauthorizedActionException;
+import com.fitness.backend.exception.UserNotFoundException;
+import com.fitness.backend.model.RefreshToken;
 import com.fitness.backend.model.User;
+import com.fitness.backend.model.UserProfile;
 import com.fitness.backend.repository.UserRepository;
 import com.fitness.backend.security.JwtUtil;
 
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 
 @Service
@@ -20,55 +33,80 @@ public class UserService {
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
   private final JwtUtil jwtUtil;
+  private final RefreshTokenService refreshTokenService;
 
-  public void registerUser(UserRegisterRequestDTO userRegisterRequestDTO) {
-
-    if (userRepository.existsByEmail(userRegisterRequestDTO.getEmail())) {
-      throw new IllegalArgumentException("Email already in use");
+  @Transactional
+  public void registerUser(UserRegisterRequest userRegisterRequest) {
+    if (userRepository.existsByEmail(userRegisterRequest.email())) {
+      throw new EmailAlreadyInUseException();
     }
-    String hashedPassword = passwordEncoder.encode(userRegisterRequestDTO.getPassword());
-    User user = User.builder()
-        .name(userRegisterRequestDTO.getName())
-        .email(userRegisterRequestDTO.getEmail())
-        .password(hashedPassword)
-        .dateOfBirth(userRegisterRequestDTO.getDateOfBirth())
-        .gender(userRegisterRequestDTO.getGender())
-        .height(userRegisterRequestDTO.getHeight())
-        .weight(userRegisterRequestDTO.getWeight())
-        .bodyFatPercentage(userRegisterRequestDTO.getBodyFatPercentage())
-        .build();
+    String hashedPassword = passwordEncoder.encode(userRegisterRequest.password());
+    User user = new User();
+    user.setName(userRegisterRequest.name());
+    user.setEmail(userRegisterRequest.email());
+    user.setPassword(hashedPassword);
     userRepository.save(user);
   }
 
-  public UserLoginResultDTO loginUser(UserLoginRequestDTO userLoginRequestDTO) {
+  @Transactional
+  public UserLoginResponse loginUser(UserLoginRequest userLoginRequestDTO) {
 
-    User potentialUser = userRepository.findByEmail(userLoginRequestDTO.getEmail())
-        .orElseThrow(() -> new IllegalArgumentException("Invalid credentials"));
-    if (!passwordEncoder.matches(userLoginRequestDTO.getPassword(), potentialUser.getPassword())) {
-      throw new IllegalArgumentException("Invalid credentials");
+    User user = userRepository.findByEmail(userLoginRequestDTO.email())
+        .orElseThrow(() -> new InvalidCredentialsException());
+
+    if (!passwordEncoder.matches(userLoginRequestDTO.password(), user.getPassword())) {
+      throw new InvalidCredentialsException();
     }
 
-    String token = jwtUtil.generateToken(potentialUser);
+    UserProfile profile = user.getUserProfile();
 
-    return new UserLoginResultDTO(
-        potentialUser.getId(),
-        potentialUser.getRole(),
-        token);
+    String accessToken = jwtUtil.generateToken(user);
+    RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
 
+    Instant accessExpiry = jwtUtil.getExpiry(accessToken);
+    Instant refreshExpiry = refreshToken.getExpiryInstant();
+
+    long accessTokenTTL = Duration.between(Instant.now(), accessExpiry).getSeconds();
+    long refreshTokenTTL = Duration.between(Instant.now(), refreshExpiry).getSeconds();
+
+    String issuedAtIso = jwtUtil.getIssuedAt(accessToken).toString();
+
+    return new UserLoginResponse(
+        user.getId(),
+        user.getRole().name(),
+        accessToken,
+        "Bearer",
+        accessTokenTTL,
+        refreshToken.getToken(),
+        refreshTokenTTL,
+        issuedAtIso,
+        new UserProfileDetail(
+            user.getName(),
+            user.getEmail(),
+            profile.getDateOfBirth().format(DateTimeFormatter.ISO_DATE), // ISO date for mobile
+            profile.getGender().name(),
+            profile.getHeight(),
+            profile.getWeight(),
+            profile.getBodyFatPercentage()));
   }
 
+  @Transactional
+  public void logoutUser(String email) {
+    Optional<User> maybeUser = userRepository.findByEmail(email);
+    maybeUser.ifPresent(user -> refreshTokenService.deleteByUser(user));
+  }
+
+  @Transactional
   public void deleteUser(Long targetUserId, String requesterEmail) {
-
     User requester = userRepository.findByEmail(requesterEmail)
-        .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        .orElseThrow(() -> new UserNotFoundException());
     User target = userRepository.findById(targetUserId)
-        .orElseThrow(() -> new IllegalArgumentException("User not found"));
-
-    boolean isAdmin = requester.getRole() == Role.ADMIN;
+        .orElseThrow(() -> new UserNotFoundException());
+    boolean isAdmin = requester.getRole().equals(Role.ADMIN);
     boolean isSelf = requester.getId().equals(target.getId());
 
     if (!isAdmin && !isSelf) {
-      throw new IllegalArgumentException("Not authorized to delete user");
+      throw new UnauthorizedActionException();
     }
 
     userRepository.delete(target);
@@ -76,7 +114,7 @@ public class UserService {
   }
 
   public User getUserByEmail(String email) {
-    return userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("User not found"));
+    return userRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException());
   }
 
 }

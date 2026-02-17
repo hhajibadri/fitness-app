@@ -13,8 +13,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -23,8 +21,6 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class Workout {
 
   @Id
@@ -34,14 +30,13 @@ public class Workout {
   @Column(nullable = false)
   private String name;
 
-  @JoinColumn(name = "user_id", nullable = false)
   @ManyToOne(optional = false)
+  @JoinColumn(name = "user_id", nullable = false)
   private User user;
 
   @Column(nullable = false)
   private LocalDateTime timestamp;
 
-  @Builder.Default
   @OneToMany(mappedBy = "workout", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<WorkoutExercise> exercises = new ArrayList<>();
 

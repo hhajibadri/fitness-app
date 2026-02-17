@@ -1,11 +1,14 @@
 package com.fitness.backend.model;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
-import com.fitness.backend.enums.Gender;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
 import com.fitness.backend.enums.Role;
 
 import jakarta.persistence.CascadeType;
@@ -17,22 +20,19 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Builder
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
 @Table(name = "users")
-public class User {
+public class User implements UserDetails {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -40,9 +40,9 @@ public class User {
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
-  @Builder.Default
   private Role role = Role.USER;
 
+  @Column(nullable = true, unique = false)
   private String name;
 
   @Column(nullable = false, unique = true)
@@ -51,32 +51,28 @@ public class User {
   @Column(nullable = false)
   private String password;
 
-  @Column(nullable = false)
-  private LocalDate dateOfBirth;
-
-  @Enumerated(EnumType.STRING)
-  @Column(nullable = false)
-  @Builder.Default
-  private Gender gender = Gender.UNSPECIFIED;
-
   @Column(nullable = false, updatable = false)
   private LocalDateTime createdAt;
 
-  @Column(nullable = false)
-  private double height;
-
-  @Column(nullable = false)
-  private double weight;
-
-  private double bodyFatPercentage;
-
   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-  @Builder.Default
   private List<Workout> workouts = new ArrayList<>();
+
+  @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+  private UserProfile userProfile;
 
   @PrePersist
   protected void init() {
     this.createdAt = LocalDateTime.now();
+  }
+
+  @Override
+  public Collection<? extends GrantedAuthority> getAuthorities() {
+    return List.of(new SimpleGrantedAuthority(role.name()));
+  }
+
+  @Override
+  public String getUsername() {
+    return name != null ? name : email;
   }
 
 }

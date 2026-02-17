@@ -1,13 +1,10 @@
 package com.fitness.backend.model;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.time.LocalDate;
 
-import com.fitness.backend.enums.Muscle;
+import com.fitness.backend.enums.Gender;
 
-import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -15,6 +12,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -23,17 +22,29 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class Exercise {
+@Table(name = "users_profiles")
+public class UserProfile {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(nullable = false)
-  private String name;
+  @OneToOne(optional = false)
+  @JoinColumn(name = "user_id", nullable = false, unique = true)
+  private User user;
 
-  @ElementCollection(targetClass = Muscle.class)
+  @Column(nullable = false)
+  private LocalDate dateOfBirth;
+
   @Enumerated(EnumType.STRING)
-  @CollectionTable(name = "exercise_muscles", joinColumns = @JoinColumn(name = "exercise_id"))
-  private Set<Muscle> muscles = new HashSet<>();
+  @Column(nullable = false)
+  private Gender gender = Gender.UNSPECIFIED;
+
+  @Column(nullable = false)
+  private double height;
+
+  @Column(nullable = false)
+  private double weight;
+
+  private double bodyFatPercentage = 0.0;
 }

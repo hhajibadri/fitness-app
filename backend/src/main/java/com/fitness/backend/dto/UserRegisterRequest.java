@@ -8,33 +8,36 @@ import com.fitness.backend.validation.Password;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
-import lombok.Data;
 
-@Data
-public class UserRegisterRequestDTO {
+public record UserRegisterRequest (
 
-  private String name;
+  String name,
 
   @NotBlank(message = "Must enter email")
   @Email(message = "Email must have valid format")
-  private String email;
+  String email,
 
   @NotBlank(message = "Must enter password")
   @Password
-  private String password;
+  String password,
 
+  @NotNull(message = "Must provide date of birth")
   @Adult
-  private LocalDate dateOfBirth;
+  LocalDate dateOfBirth,
 
-  private Gender gender;
+  Gender gender,
 
   @Positive(message = "Height must be positive")
-  private double height;
+  @NotNull(message = "Must provide height")
+  Double height,
 
   @Positive(message = "Weight must be positive")
-  private double weight;
+  @NotNull(message = "Must provide weight")
+  Double weight,
 
   @Positive(message = "Bodyfat must be positive")
-  private double bodyFatPercentage;
-}
+  @NotNull(message = "Must provide body fat percentage")
+  Double bodyFatPercentage
+) {}

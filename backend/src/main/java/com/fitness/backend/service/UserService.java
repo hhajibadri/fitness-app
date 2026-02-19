@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.fitness.backend.dto.BasicUserDetail;
 import com.fitness.backend.dto.UpdateEmailRequest;
+import com.fitness.backend.dto.UpdateUserProfileRequest;
 import com.fitness.backend.dto.UserDetail;
 import com.fitness.backend.dto.UserLoginRequest;
 import com.fitness.backend.dto.UserProfileDetail;
@@ -46,8 +47,7 @@ public class UserService {
   @Transactional
   public void updateEmail(String currentEmail, UpdateEmailRequest request) {
 
-    User user = userRepository.findByEmail(currentEmail)
-        .orElseThrow(UserNotFoundException::new);
+    User user = getUserByEmail(currentEmail);
 
     if (!passwordEncoder.matches(request.password(), user.getPassword())) {
       throw new UnauthorizedActionException();
@@ -67,7 +67,7 @@ public class UserService {
 
   public BasicUserDetail getUserDetail(String email) {
 
-    User user = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
+    User user = getUserByEmail(email);
 
     UserProfile profile = user.getUserProfile();
 
@@ -112,8 +112,7 @@ public class UserService {
   @Transactional
   public UserDetail loginUser(UserLoginRequest userLoginRequest) {
 
-    User user = userRepository.findByEmail(userLoginRequest.email())
-        .orElseThrow(() -> new InvalidCredentialsException());
+    User user = getUserByEmail(userLoginRequest.email());
 
     if (!passwordEncoder.matches(userLoginRequest.password(), user.getPassword())) {
       throw new InvalidCredentialsException();
@@ -158,10 +157,8 @@ public class UserService {
 
   @Transactional
   public void deleteUser(Long targetUserId, String requesterEmail) {
-    User requester = userRepository.findByEmail(requesterEmail)
-        .orElseThrow(UserNotFoundException::new);
-    User target = userRepository.findById(targetUserId)
-        .orElseThrow(UserNotFoundException::new);
+    User requester = getUserByEmail(requesterEmail);
+    User target = getUserById(targetUserId);
     boolean isAdmin = requester.getRole() == Role.ADMIN;
     boolean isSelf = requester.getId().equals(target.getId());
 
@@ -173,8 +170,39 @@ public class UserService {
 
   }
 
+  @Transactional
+  public void updateUserProfile(String email, UpdateUserProfileRequest details) {
+
+    User user = getUserByEmail(email);
+    UserProfile userProfile = user.getUserProfile();
+
+    if (details.dateOfBirth() != null) {
+      userProfile.setDateOfBirth(details.dateOfBirth());
+    }
+
+    if (details.gender() != null) {
+      userProfile.setGender(details.gender());
+    }
+
+    if (details.height() != null) {
+      userProfile.setHeight(details.height());
+    }
+
+    if (details.weight() != null) {
+      userProfile.setWeight(details.weight());
+    }
+
+    if (details.bodyFatPercentage() != null) {
+      userProfile.setBodyFatPercentage(details.bodyFatPercentage());
+    }
+  }
+
   public User getUserByEmail(String email) {
     return userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
+  }
+
+  public User getUserById(Long id) {
+    return userRepository.findById(id).orElseThrow(UserNotFoundException::new);
   }
 
 }

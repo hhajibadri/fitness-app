@@ -1,6 +1,6 @@
 package com.fitness.backend.repository;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -10,12 +10,13 @@ import org.springframework.stereotype.Repository;
 
 import com.fitness.backend.model.Workout;
 
+
 @Repository
 public interface WorkoutRepository extends JpaRepository<Workout, Long> {
 
   List<Workout> findByUserId(Long userId);
 
-  List<Workout> findByCreatedAtAfter(Instant dateTime);
+  List<Workout> findByTimestamp(LocalDateTime timestamp);
 
   Page<Workout> findByUserId(Long userId, Pageable pageable);
 

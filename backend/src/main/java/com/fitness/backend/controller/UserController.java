@@ -11,14 +11,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fitness.backend.dto.BasicUserDetail;
 import com.fitness.backend.dto.RefreshRequest;
 import com.fitness.backend.dto.RefreshResponse;
-import com.fitness.backend.dto.UserLoginRequest;
 import com.fitness.backend.dto.UserDetail;
+import com.fitness.backend.dto.UserLoginRequest;
 import com.fitness.backend.dto.UserRegisterRequest;
 import com.fitness.backend.model.RefreshToken;
 import com.fitness.backend.security.JwtUtil;

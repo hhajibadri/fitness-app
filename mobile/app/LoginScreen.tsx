@@ -1,17 +1,36 @@
 import { Link } from "expo-router";
 import { useState } from "react";
-import { View, TextInput, Button, Text, StyleSheet } from "react-native";
+import { Button, StyleSheet, Text, TextInput, View } from "react-native";
+
+type FormState = {
+  email: string;
+  password: string;
+};
 
 export default function LoginScreen() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [message, setMessage] = useState("");
+
+  const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+
+  const [form, setForm] = useState<FormState>({
+    email: "",
+    password: ""
+  });
+  
+  const [message, setMessage] = useState<string>("");
 
   const handleLogin = async () => {
-    if (email === "test@example.com" && password === "1234") {
-      setMessage("Login successful!");
-    } else {
-      setMessage("Invalid credentials");
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/users/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(form),
+      });
+      const data = await res.json();
+      setMessage(data.error ?? "Logged in!");
+    } catch (err) {
+      setMessage("Login failed");
     }
   };
 
@@ -22,8 +41,8 @@ export default function LoginScreen() {
       <TextInput
         style={styles.input}
         placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
+        value={form.email}
+        onChangeText={(text: string) => setForm({ ...form, email: text })}
         autoCapitalize="none"
         keyboardType="email-address"
       />
@@ -31,8 +50,8 @@ export default function LoginScreen() {
       <TextInput
         style={styles.input}
         placeholder="Password"
-        value={password}
-        onChangeText={setPassword}
+        value={form.password}
+        onChangeText={(text: string) => setForm({ ...form, password: text })}
         secureTextEntry
       />
 

@@ -4,22 +4,47 @@ import { View, TextInput, Button, Text, StyleSheet, Pressable } from "react-nati
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Ionicons } from "@expo/vector-icons";
 
+type FormState = {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  dob: Date | null;
+};
+
 export default function SignupScreen() {
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [passwordCheck, setPasswordCheck] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
+  const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
-  const [dob, setDob] = useState<Date | null>(null);
-  const [showPicker, setShowPicker] = useState(false);
+  const [form, setForm] = useState<FormState>({
+    email: "",
+    password: "",
+    firstName: "",
+    lastName: "",
+    dob: null
+  });
 
-  const isSame = password === passwordCheck;
-  const formattedDob = dob ? dob.toLocaleDateString() : "Date of Birth";
+  const [passwordCheck, setPasswordCheck] = useState<string>("");
+  const [showPicker, setShowPicker] = useState<boolean>(false);
+  const [message, setMessage] = useState<string>("");
+
+  const isSame = form.password === passwordCheck;
+  const formattedDob = form.dob ? form.dob.toLocaleDateString() : "Date of Birth";
 
   const handleSignup = async () => {
-    return;
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/users/signup`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(form),
+      });
+      const data = await res.json();
+      setMessage(data.error ?? "Account created!");
+    } catch (err) {
+      setMessage("Signup failed!");
+    }
   }
 
   return (
@@ -29,8 +54,8 @@ export default function SignupScreen() {
       <TextInput
         style={styles.input}
         placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
+        value={form.email}
+        onChangeText={(text: string) => setForm({ ...form, email: text })}
         autoCapitalize="none"
         keyboardType="email-address"
       />
@@ -38,8 +63,8 @@ export default function SignupScreen() {
       <TextInput
         style={styles.input}
         placeholder="Password"
-        value={password}
-        onChangeText={setPassword}
+        value={form.password}
+        onChangeText={(text: string) => setForm({ ...form, password: text })}
         secureTextEntry
       />
 
@@ -56,15 +81,15 @@ export default function SignupScreen() {
       <TextInput
         style={styles.input}
         placeholder="First name"
-        value={firstName}
-        onChangeText={setFirstName}
+        value={form.firstName}
+        onChangeText={(text: string) => setForm({ ...form, firstName: text })}
       />
 
       <TextInput
         style={styles.input}
         placeholder="Last name"
-        value={lastName}
-        onChangeText={setLastName}
+        value={form.lastName}
+        onChangeText={(text: string) => setForm({ ...form, lastName: text })}
       />
 
       <Pressable
@@ -77,20 +102,20 @@ export default function SignupScreen() {
 
       {showPicker && (
         <DateTimePicker
-          value={dob ?? new Date()}
+          value={form.dob ?? new Date()}
           mode="date"
           display="default"
           maximumDate={new Date()}
           onChange={(_, selectedDate) => {
             setShowPicker(false);
             if (selectedDate) {
-              setDob(selectedDate);
+              setForm({...form, dob: selectedDate});
             }
           }}
         />
       )}
 
-      <Button title="Signup" onPress={handleSignup} disabled={!isSame || !password} />
+      <Button title="Signup" onPress={handleSignup} disabled={!isSame || !form.password} />
 
     </View>
   );

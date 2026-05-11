@@ -1,5 +1,6 @@
 package com.fitness.backend.security;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -11,7 +12,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import com.fitness.backend.model.User;
 import com.fitness.backend.service.UserService;
 
-import io.jsonwebtoken.io.IOException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -38,18 +38,25 @@ public class JwtFilter extends OncePerRequestFilter {
     if (cookies != null) {
       for (Cookie cookie : cookies) {
         if (cookie.getName().equals("access_token")) {
+
           String token = cookie.getValue();
+
           if (jwtUtil.validateJwtToken(token)) {
+
             String email = jwtUtil.getEmailFromToken(token);
             User user = userService.getUserByEmail(email);
+
             UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
                 user, null, List.of(new SimpleGrantedAuthority(user.getRole().name())));
+
             SecurityContextHolder.getContext().setAuthentication(auth);
           }
           break;
         }
       }
     }
+
+    filterChain.doFilter(servletRequest, servletResponse);
 
   }
 

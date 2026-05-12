@@ -46,5 +46,6 @@ public class UserProfile {
   @Column(nullable = false)
   private double weight;
 
-  private double bodyFatPercentage = 0.0;
+  @Column(nullable = true)
+  private Double bodyFatPercentage = 0.0;
 }

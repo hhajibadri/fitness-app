@@ -2,6 +2,7 @@ package com.fitness.backend.service;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
@@ -35,6 +36,7 @@ public class UserService {
   private final PasswordEncoder passwordEncoder;
   private final RefreshTokenService refreshTokenService;
   private final UserRepository userRepository;
+  private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("MM/dd/yyyy");
 
   public UserService(JwtUtil jwtUtil, PasswordEncoder passwordEncoder, RefreshTokenService refreshTokenService,
       UserRepository userRepository) {
@@ -78,10 +80,7 @@ public class UserService {
             user.getName(),
             user.getEmail(),
             profile.getDateOfBirth().format(DateTimeFormatter.ISO_DATE),
-            profile.getGender().name(),
-            profile.getHeight(),
-            profile.getWeight(),
-            profile.getBodyFatPercentage()));
+            profile.getGender().name()));
 
   }
 
@@ -100,11 +99,8 @@ public class UserService {
     user.setUserProfile(userProfile);
 
     userProfile.setUser(user);
-    userProfile.setDateOfBirth(userRegisterRequest.dateOfBirth());
+    userProfile.setDateOfBirth(LocalDate.parse(userRegisterRequest.dateOfBirth(), FORMATTER));
     userProfile.setGender(userRegisterRequest.gender());
-    userProfile.setHeight(userRegisterRequest.height());
-    userProfile.setWeight(userRegisterRequest.weight());
-    userProfile.setBodyFatPercentage(userRegisterRequest.bodyFatPercentage());
 
     userRepository.save(user);
   }
@@ -143,10 +139,7 @@ public class UserService {
             user.getName(),
             user.getEmail(),
             profile.getDateOfBirth().format(DateTimeFormatter.ISO_DATE), // ISO date for mobile
-            profile.getGender().name(),
-            profile.getHeight(),
-            profile.getWeight(),
-            profile.getBodyFatPercentage()));
+            profile.getGender().name()));
   }
 
   @Transactional

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { View, TextInput, Button, Text, StyleSheet, Pressable } from "react-native";
 
-import DateTimePicker from "@react-native-community/datetimepicker";
+import { DatePickerModal } from "react-native-paper-dates";
 import { Ionicons } from "@expo/vector-icons";
 
 type FormState = {
@@ -9,7 +9,8 @@ type FormState = {
   password: string;
   firstName: string;
   lastName: string;
-  dob: Date | null;
+  dob: string;
+  gender: string;
 };
 
 export default function SignupScreen() {
@@ -21,19 +22,21 @@ export default function SignupScreen() {
     password: "",
     firstName: "",
     lastName: "",
-    dob: null
+    dob: String((new Date()).toLocaleDateString()),
+    gender: ""
   });
 
-  const [passwordCheck, setPasswordCheck] = useState<string>("");
-  const [showPicker, setShowPicker] = useState<boolean>(false);
-  const [message, setMessage] = useState<string>("");
+  const [passwordCheck, setPasswordCheck] = useState("");
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showGenderPicker, setShowGenderPicker] = useState(false);
+  const [message, setMessage] = useState("");
 
   const isSame = form.password === passwordCheck;
-  const formattedDob = form.dob ? form.dob.toLocaleDateString() : "Date of Birth";
+  const formattedDob = form.dob ? form.dob : "Date of Birth";
 
   const handleSignup = async () => {
     try {
-      const res = await fetch(`${BACKEND_URL}/api/users/signup`, {
+      const res = await fetch(`${BACKEND_URL}/api/users/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -94,28 +97,72 @@ export default function SignupScreen() {
 
       <Pressable
         style={styles.dobInput}
-        onPress={() => setShowPicker(true)}
+        onPress={() => setShowDatePicker(true)}
       >
         <Text>{formattedDob}</Text>
         <Ionicons name="calendar-outline" size={20} color="#666" />
       </Pressable>
 
-      {showPicker && (
-        <DateTimePicker
-          value={form.dob ?? new Date()}
-          mode="date"
-          display="default"
-          maximumDate={new Date()}
-          onChange={(_, selectedDate) => {
-            setShowPicker(false);
-            if (selectedDate) {
-              setForm({...form, dob: selectedDate});
+      <Pressable
+        style={styles.genderInput}
+        onPress={() => setShowGenderPicker(!showGenderPicker)}
+      >
+        <Text>{form.gender || "Select Gender"}</Text>
+        <Ionicons name="chevron-down-outline" size={20} color="#666" />
+
+        {showGenderPicker && (
+          <View>
+            <Pressable
+              style={styles.genderInputOption}
+              onPress={() => {
+                setForm({ ...form, gender: "MALE" });
+                setShowGenderPicker(false);
+              }}>
+              <Text>MALE</Text>
+            </Pressable>
+            <Pressable
+              style={styles.genderInputOption}
+              onPress={() => {
+                setForm({ ...form, gender: "FEMALE" });
+                setShowGenderPicker(false);
+              }}>
+              <Text>FEMALE</Text>
+            </Pressable>
+            <Pressable
+              style={styles.genderInputOption}
+              onPress={() => {
+                setForm({ ...form, gender: "UNSPECIFIED" });
+                setShowGenderPicker(false);
+              }}>
+              <Text>UNSPECIFIED</Text>
+            </Pressable>
+          </View>
+        )}
+
+      </Pressable>
+
+      {showDatePicker && (
+        <DatePickerModal
+          locale="en"
+          mode="single"
+          visible={showDatePicker}
+          onDismiss={() => setShowDatePicker(false)}
+          date={new Date(form.dob) ?? undefined}
+          onConfirm={({ date }) => {
+            setShowDatePicker(false);
+            if (date) {
+              setForm({
+                ...form,
+                dob: String(date.toLocaleDateString())
+              });
             }
           }}
         />
       )}
 
       <Button title="Signup" onPress={handleSignup} disabled={!isSame || !form.password} />
+
+      {message ? <Text style={styles.message}>{message}</Text> : null}
 
     </View>
   );
@@ -148,6 +195,25 @@ const styles = StyleSheet.create({
     marginVertical: 15,
     textAlign: "center",
     color: "red"
+  },
+  genderInput: {
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 15,
+    backgroundColor: "#fff",
+    borderColor: "#ccc",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 15
+  },
+  genderInputOption: {
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 2,
+    paddingVertical: 1,
+    marginVertical: 4
   },
   dobInput: {
     height: 50,

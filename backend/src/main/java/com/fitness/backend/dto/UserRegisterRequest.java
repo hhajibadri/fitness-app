@@ -1,7 +1,5 @@
 package com.fitness.backend.dto;
 
-import java.time.LocalDate;
-
 import com.fitness.backend.enums.Gender;
 import com.fitness.backend.validation.Adult;
 import com.fitness.backend.validation.Password;
@@ -9,7 +7,6 @@ import com.fitness.backend.validation.Password;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
 
 public record UserRegisterRequest (
 
@@ -25,19 +22,8 @@ public record UserRegisterRequest (
 
   @NotNull(message = "Must provide date of birth")
   @Adult
-  LocalDate dateOfBirth,
+  String dateOfBirth,
 
-  Gender gender,
-
-  @Positive(message = "Height must be positive")
-  @NotNull(message = "Must provide height")
-  Double height,
-
-  @Positive(message = "Weight must be positive")
-  @NotNull(message = "Must provide weight")
-  Double weight,
-
-  @Positive(message = "Bodyfat must be positive")
-  @NotNull(message = "Must provide body fat percentage")
-  Double bodyFatPercentage
+  @NotNull(message = "Must provide gender")
+  Gender gender
 ) {}

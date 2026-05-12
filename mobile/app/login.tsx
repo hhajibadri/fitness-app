@@ -16,7 +16,7 @@ export default function LoginScreen() {
     password: ""
   });
   
-  const [message, setMessage] = useState<string>("");
+  const [message, setMessage] = useState("");
 
   const handleLogin = async () => {
     try {
@@ -59,7 +59,7 @@ export default function LoginScreen() {
 
       {message ? <Text style={styles.message}>{message}</Text> : null}
 
-      <Link href="/SignupScreen">Signup</Link>
+      <Link href="/signup">Signup</Link>
     </View>
   );
 }

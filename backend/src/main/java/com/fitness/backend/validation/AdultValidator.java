@@ -15,6 +15,8 @@ public class AdultValidator implements ConstraintValidator<Adult, String> {
   @Override
   public boolean isValid(String dateOfBirth, ConstraintValidatorContext context) {
     
+    System.out.println(dateOfBirth);
+
     if (dateOfBirth == null || dateOfBirth.isBlank()) {
       return false;
     }

@@ -39,13 +39,4 @@ public class UserProfile {
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
   private Gender gender = Gender.UNSPECIFIED;
-
-  @Column(nullable = false)
-  private double height;
-
-  @Column(nullable = false)
-  private double weight;
-
-  @Column(nullable = true)
-  private Double bodyFatPercentage = 0.0;
 }

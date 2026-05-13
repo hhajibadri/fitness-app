@@ -79,7 +79,7 @@ public class UserService {
         new UserProfileDetail(
             user.getName(),
             user.getEmail(),
-            profile.getDateOfBirth().format(DateTimeFormatter.ISO_DATE),
+            profile.getDateOfBirth().format(FORMATTER),
             profile.getGender().name()));
 
   }
@@ -138,7 +138,7 @@ public class UserService {
         new UserProfileDetail(
             user.getName(),
             user.getEmail(),
-            profile.getDateOfBirth().format(DateTimeFormatter.ISO_DATE), // ISO date for mobile
+            profile.getDateOfBirth().format(FORMATTER),
             profile.getGender().name()));
   }
 
@@ -175,18 +175,6 @@ public class UserService {
 
     if (details.gender() != null) {
       userProfile.setGender(details.gender());
-    }
-
-    if (details.height() != null) {
-      userProfile.setHeight(details.height());
-    }
-
-    if (details.weight() != null) {
-      userProfile.setWeight(details.weight());
-    }
-
-    if (details.bodyFatPercentage() != null) {
-      userProfile.setBodyFatPercentage(details.bodyFatPercentage());
     }
   }
 

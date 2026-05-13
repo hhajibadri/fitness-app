@@ -9,7 +9,7 @@ type FormState = {
   password: string;
   firstName: string;
   lastName: string;
-  dob: string;
+  dateOfBirth: string;
   gender: string;
 };
 
@@ -22,7 +22,7 @@ export default function SignupScreen() {
     password: "",
     firstName: "",
     lastName: "",
-    dob: String((new Date()).toLocaleDateString()),
+    dateOfBirth: String((new Date()).toLocaleDateString()),
     gender: ""
   });
 
@@ -32,7 +32,7 @@ export default function SignupScreen() {
   const [message, setMessage] = useState("");
 
   const isSame = form.password === passwordCheck;
-  const formattedDob = form.dob ? form.dob : "Date of Birth";
+  const formattedDob = form.dateOfBirth ? form.dateOfBirth : "Date of Birth";
 
   const handleSignup = async () => {
     try {
@@ -147,13 +147,13 @@ export default function SignupScreen() {
           mode="single"
           visible={showDatePicker}
           onDismiss={() => setShowDatePicker(false)}
-          date={new Date(form.dob) ?? undefined}
+          date={new Date(form.dateOfBirth) ?? undefined}
           onConfirm={({ date }) => {
             setShowDatePicker(false);
             if (date) {
               setForm({
                 ...form,
-                dob: String(date.toLocaleDateString())
+                dateOfBirth: String(date.toLocaleDateString())
               });
             }
           }}

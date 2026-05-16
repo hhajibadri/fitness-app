@@ -17,6 +17,8 @@ import com.fitness.backend.model.RefreshToken;
 import com.fitness.backend.model.User;
 import com.fitness.backend.repository.RefreshTokenRepository;
 
+import jakarta.transaction.Transactional;
+
 @Service
 public class RefreshTokenService {
 
@@ -27,8 +29,9 @@ public class RefreshTokenService {
     this.refreshTokenRepository = refreshTokenRepository;
   }
 
+  @Transactional
   public RefreshToken createRefreshToken(User user) {
-    RefreshToken refreshToken = new RefreshToken();
+    RefreshToken refreshToken = refreshTokenRepository.findByUser(user).orElse(new RefreshToken());
     refreshToken.setUser(user);
     refreshToken.setExpiryInstant(Instant.now().plus(refreshExpiration));
     String plainToken = UUID.randomUUID().toString();
@@ -51,16 +54,19 @@ public class RefreshTokenService {
     return refreshToken;
   }
 
+  @Transactional
   public RefreshToken rotateRefreshToken(RefreshToken oldToken) {
     User user = oldToken.getUser();
     refreshTokenRepository.delete(oldToken);
     return createRefreshToken(user);
   }
 
+  @Transactional
   public void deleteByUser(User user) {
     refreshTokenRepository.deleteByUser(user);
   }
 
+  @Transactional
   @Scheduled(cron = "0 0 0 * * ?")
   public void purgeExpiredTokens() {
     refreshTokenRepository.deleteAllByExpiryInstantBefore(Instant.now());
@@ -68,9 +74,9 @@ public class RefreshTokenService {
 
   public String hashToken(String token) {
     try {
-    MessageDigest digest = MessageDigest.getInstance("SHA-256");
-    byte[] hash = digest.digest(token.getBytes(StandardCharsets.UTF_8));
-    return Base64.getEncoder().encodeToString(hash);
+      MessageDigest digest = MessageDigest.getInstance("SHA-256");
+      byte[] hash = digest.digest(token.getBytes(StandardCharsets.UTF_8));
+      return Base64.getEncoder().encodeToString(hash);
     } catch (NoSuchAlgorithmException e) {
       throw new RuntimeException("SHA-256 algorithm not available", e);
     }

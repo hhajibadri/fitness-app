@@ -56,10 +56,13 @@ export default function LoginScreen() {
       />
 
       <Button title="Login" onPress={handleLogin} />
-
+      
       {message ? <Text style={styles.message}>{message}</Text> : null}
 
-      <Link href="/signup">Signup</Link>
+      <View style={styles.signUpButton}>
+        <Link href="/signup">Signup</Link>
+      </View>
+
     </View>
   );
 }
@@ -90,5 +93,15 @@ const styles = StyleSheet.create({
     marginTop: 15,
     textAlign: "center",
     color: "red"
+  },
+  signUpButton: {
+    borderColor: "#ccc",
+    borderWidth: 1,
+    borderRadius: 8,
+    marginTop: 5,
+    padding: 5,
+    justifyContent: "center",
+    alignItems: "center",
+    alignSelf: "center"
   }
 });

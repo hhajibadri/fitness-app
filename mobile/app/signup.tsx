@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { View, TextInput, Button, Text, StyleSheet, Pressable } from "react-native";
+import { Button, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 
-import { DatePickerModal } from "react-native-paper-dates";
 import { Ionicons } from "@expo/vector-icons";
+import { DatePickerModal } from "react-native-paper-dates";
 
 type FormState = {
   email: string;
@@ -43,8 +43,12 @@ export default function SignupScreen() {
         },
         body: JSON.stringify(form),
       });
-      const data = await res.json();
-      setMessage(data.error ?? "Account created!");
+      if (!res.ok) {
+        const data = await res.json();
+        setMessage(data.error);
+      } else {
+        setMessage("Account created!");
+      }
     } catch (err) {
       setMessage("Signup failed!");
     }
@@ -79,7 +83,7 @@ export default function SignupScreen() {
         secureTextEntry
       />
 
-      {!isSame ? <Text style={styles.message}>Passwords do not match</Text> : null}
+      {!isSame ? <Text style={styles.message}>Passwords do not match!</Text> : null}
 
       <TextInput
         style={styles.input}
@@ -200,6 +204,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 8,
     paddingHorizontal: 15,
+    paddingTop: 2,
     backgroundColor: "#fff",
     borderColor: "#ccc",
     justifyContent: "center",
